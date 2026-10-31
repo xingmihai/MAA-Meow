@@ -28,8 +28,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    permissions:
+      contents: write
 
     steps:
+      - name: Prepare diagnostics dir
+        run: mkdir -p /tmp/diag
       - name: Checkout
         uses: actions/checkout@v7
         with:
@@ -71,6 +75,7 @@ jobs:
       - name: Probe Chaquopy wheel index
         continue-on-error: true
         run: |
+          {
           echo "=== onnxruntime (Android wheels on chaquo.com) ==="
           curl -sL "https://chaquo.com/pypi-13.1/onnxruntime/" \
             | grep -oE 'onnxruntime-[0-9][0-9.]*-cp[0-9]+-[^"]*android[^"]*\.whl' \
@@ -80,6 +85,7 @@ jobs:
           curl -sL "https://chaquo.com/pypi-13.1/opencv-python-headless/" \
             | grep -oE 'opencv_python_headless-[0-9][0-9.]*-[0-9]+-cp[0-9]+-[^"]*android[^"]*\.whl' \
             | sort -u | tail -10 || echo "(index unreachable)"
+          } 2>&1 | tee /tmp/diag/wheels.txt
 
       # ---------- 阶段三：切到 3.11 供 Chaquopy 构建 ----------
       # Chaquopy 要求 buildPython 与 app 的 Python major.minor 一致。
@@ -114,7 +120,9 @@ jobs:
           CHAQUOPY_BUILD_PYTHON: ${{ env.CHAQUOPY_BUILD_PYTHON }}
         run: |
           chmod +x ./gradlew
-          ./gradlew clean assembleDebug -Pmaa.abi=${{ github.event.inputs.abi || 'arm64-v8a' }}
+          set -o pipefail
+          ./gradlew clean assembleDebug -Pmaa.abi=${{ github.event.inputs.abi || 'arm64-v8a' }} 2>&1 \
+            | tee /tmp/diag/gradle.log
 
       # ---------- 阶段五：验证 Python 层确实打进了 APK ----------
       - name: Verify Python layer inside APK
@@ -144,3 +152,49 @@ jobs:
           path: |
             app/build/reports/
             .cxx/
+
+      # 把诊断信息写回仓库的 ci-logs 分支，便于脱离 Actions 页面查看。
+      # （Actions 日志的下载域名在部分网络环境下不可达，这里留一条备用读数通道。）
+      - name: Export diagnostics to ci-logs branch
+        if: always()
+        run: |
+          {
+            echo "run: ${{ github.run_id }}  attempt: ${{ github.run_attempt }}"
+            echo "commit: ${{ github.sha }}"
+            echo "date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo
+            echo "================ Gradle error summary ================"
+            if [ -f /tmp/diag/gradle.log ]; then
+              grep -nE \
+                -e 'FAILURE:' \
+                -e 'What went wrong' \
+                -e 'Could not determine' \
+                -e 'Could not resolve' \
+                -e 'Could not find' \
+                -e 'Failed to apply plugin' \
+                -e 'error:' \
+                -e 'Caused by' \
+                -e 'Execution failed for task' \
+                -e '^\* ' \
+                /tmp/diag/gradle.log | head -60
+              echo
+              echo "---- last 120 lines of gradle.log ----"
+              tail -120 /tmp/diag/gradle.log
+            else
+              echo "(gradle.log missing)"
+            fi
+            echo
+            echo "================ Chaquopy wheel probe ================"
+            cat /tmp/diag/wheels.txt 2>/dev/null || echo "(no probe output)"
+          } > /tmp/diag/report.txt 2>&1
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan ci-logs 2>/dev/null || git checkout ci-logs
+          git rm -rf . --quiet 2>/dev/null || true
+          cp /tmp/diag/report.txt ci-report.txt
+          cp /tmp/diag/wheels.txt ci-wheels.txt 2>/dev/null || true
+          git add ci-report.txt ci-wheels.txt
+          git commit -m "ci: diagnostics for run ${{ github.run_id }}" --quiet
+          git push origin ci-logs --force
+          echo "diagnostics pushed to ci-logs branch"
