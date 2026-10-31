@@ -11,8 +11,6 @@ plugins {
     alias(libs.plugins.ksp)
     id("com.aliothmoon.maameow.asset-manifest")
     id("com.aliothmoon.maameow.i18n-verify")
-    // 一条龙的 Python 内核（绝区零自动化）。详见 MIGRATION-ZZZ.md
-    id("com.chaquo.python")
 }
 
 val localProperties = Properties().apply {
@@ -197,37 +195,6 @@ android {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Chaquopy：把一条龙的 Python 内核打进 APK
-// 现阶段只装「模板匹配」所需依赖，够跑静态日常。
-//   * onnxruntime 暂未列入：Chaquo 索引上只见 1.12/1.13 旧版，
-//     是否适配 3.11 待 build-zzz.yml 的探测步骤确认；
-//     确认可用后再追加 install("onnxruntime")，用于 OCR/YOLO。
-//   * 装不了的：pyautogui / pynput / mss / onnxruntime-directml / PySide6
-// ---------------------------------------------------------------------------
-chaquopy {
-    defaultConfig {
-        version = "3.11"
-
-        // buildPython 必须与上面同 major.minor。
-        // CI 由 CHAQUOPY_BUILD_PYTHON 显式指定；本地不设则让插件自己找。
-        val buildPythonPath = System.getenv("CHAQUOPY_BUILD_PYTHON").orEmpty()
-        if (buildPythonPath.isNotEmpty()) {
-            buildPython(buildPythonPath)
-            println("[Chaquopy] buildPython -> $buildPythonPath")
-        }
-
-        pip {
-            install("numpy")
-            // headless 版：不带 GUI 依赖，体积更小
-            install("opencv-python-headless")
-            install("pillow")
-            install("pyyaml")
-            install("shapely")
-        }
     }
 }
 
