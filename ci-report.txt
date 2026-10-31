@@ -1,0 +1,142 @@
+run: 41198681949  attempt: 1
+commit: 5fe5b7d40686c3ea1f8b063fcd64fb8565f27e91
+date: 2026-10-31T11:59:15Z
+
+================ Gradle error summary ================
+
+---- last 120 lines of gradle.log ----
+Generated achievementStringResId: 284 entries
+
+> Task :hidden-api:generateDebugResources
+
+> Task :app:verifyI18nStrings
+[i18n][WARN] values-en value contains Chinese (likely untranslated): blackflow_outcome_start_run_utopia_missed -> Floor 1 is not 实托邦
+[i18n][WARN] values-en value contains Chinese (likely untranslated): blackflow_start_run_reward_picked -> Starting reward picked; entering Floor 1 to check for 实托邦
+[i18n][WARN] values-en value contains Chinese (likely untranslated): panel_infrast_fiammetta_target_hbound -> 旅骨 (Unreleased)
+[i18n][WARN] values-en value contains Chinese (likely untranslated): panel_roguelike_blackflow_start_utopia -> Reroll until Floor 1 is 实托邦 (a Floor 1 variant)
+[i18n][WARN] values-en value contains Chinese (likely untranslated): panel_roguelike_blackflow_start_utopia_tip -> Once a desired reward appears on the support screen, the target run picks cards by \"Starting Reward Pick Priority\" and enters Floor 1.\nIf Floor 1 is 实托邦, the task exits and keeps the run; otherwise it abandons the run and starts another preparation run.\nThe target run starts with the roles and starting operator from General settings.\nRequires difficulty 6 or higher; difficulty is not checked when it is set not to switch.
+[i18n][WARN] values-ko value contains Chinese (likely untranslated): blackflow_outcome_start_run_utopia_missed -> 1층이 实托邦이 아닙니다
+[i18n][WARN] values-ko value contains Chinese (likely untranslated): blackflow_start_run_reward_picked -> 시작 보상을 골랐습니다. 1층이 实托邦인지 확인합니다
+[i18n][WARN] values-ko value contains Chinese (likely untranslated): panel_infrast_fiammetta_target_hbound -> 旅骨(미실장)
+[i18n][WARN] values-ko value contains Chinese (likely untranslated): panel_roguelike_blackflow_start_utopia -> 1층 实托邦(1층 종류) 노리기
+[i18n][WARN] values-ko value contains Chinese (likely untranslated): panel_roguelike_blackflow_start_utopia_tip -> 목표 탐험의 지원 화면에 원하는 보상이 나오면 「시작 보상 선택 우선순위」 순서로 카드를 고르고 1층에 들어갑니다.\n1층이 实托邦이면 이번 탐험을 유지한 채 나오고, 아니면 이번 탐험을 포기하고 준비 탐험을 다시 진행합니다.\n목표 탐험은 일반 설정의 직업 그룹과 시작 오퍼레이터로 시작합니다.\n난이도 6 이상이 필요합니다. 난이도를 전환하지 않는 설정에서는 난이도를 확인하지 않습니다.
+i18n verification passed: 2770 zh, 2770 en, 2770 ko (warnings: 10)
+
+> Task :hidden-api:processDebugNavigationResources
+> Task :hidden-api:packageDebugResources
+> Task :hidden-api:javaPreCompileDebug
+> Task :ksp-processor:processResources
+> Task :hidden-api:checkDebugAarMetadata
+
+> Task :app:generateAssetManifest
+Directory already exists: /home/runner/work/MAA-Meow/MAA-Meow/app/src/main/assets/MaaSync/MaaResource
+Generated asset manifest: 10086 files
+
+> Task :app:preBuild
+> Task :app:preDebugBuild
+> Task :hidden-api:mergeDebugJniLibFolders
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugBuildConfig
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:processDebugNavigationResources
+> Task :hidden-api:parseDebugLocalResources
+> Task :app:parseDebugLocalResources
+> Task :hidden-api:generateDebugRFile
+> Task :hidden-api:compileDebugKotlin NO-SOURCE
+> Task :app:generateDebugRFile
+> Task :app:compileDebugAidl
+> Task :hidden-api:compileDebugJavaWithJavac
+> Task :hidden-api:bundleLibCompileToJarDebug
+> Task :app:mergeDebugAssets
+> Task :app:generateDebugGlobalSynthetics
+> Task :app:desugarDebugFileDependencies
+> Task :annotation-api:compileKotlin
+> Task :annotation-api:compileJava NO-SOURCE
+> Task :annotation-api:classes UP-TO-DATE
+> Task :annotation-api:jar
+> Task :app:checkDebugAarMetadata
+> Task :app:checkDebugDuplicateClasses
+> Task :ksp-processor:compileKotlin
+> Task :ksp-processor:compileJava NO-SOURCE
+> Task :ksp-processor:classes
+> Task :ksp-processor:jar
+> Task :app:compressDebugAssets
+> Task :app:mergeExtDexDebug
+> Task :app:mergeLibDexDebug
+> Task :app:kspDebugKotlin
+> Task :app:javaPreCompileDebug
+> Task :app:mapDebugSourceSetPaths
+> Task :app:compileDebugNavigationResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:mergeDebugResources
+> Task :app:processDebugResources
+> Task :app:mergeDebugJniLibFolders
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :hidden-api:mergeDebugNativeLibs NO-SOURCE
+> Task :hidden-api:stripDebugDebugSymbols NO-SOURCE
+> Task :hidden-api:copyDebugJniLibsProjectAndLocalJars
+> Task :hidden-api:extractDebugAnnotations
+> Task :hidden-api:extractDeepLinksForAarDebug
+> Task :hidden-api:mergeDebugAssets
+> Task :hidden-api:mergeDebugGeneratedProguardFiles
+> Task :hidden-api:mergeDebugConsumerProguardFiles
+> Task :hidden-api:prepareDebugArtProfile
+> Task :hidden-api:prepareLintJarForPublish
+> Task :hidden-api:processDebugManifest
+> Task :hidden-api:processDebugJavaRes NO-SOURCE
+> Task :hidden-api:mergeDebugJavaResource
+> Task :hidden-api:syncDebugLibJars
+> Task :hidden-api:writeDebugAarMetadata
+> Task :hidden-api:bundleDebugAar
+> Task :hidden-api:assembleDebug
+> Task :app:configureCMakeDebug[arm64-v8a]
+> Task :app:buildCMakeDebug[arm64-v8a]
+> Task :app:mergeDebugNativeLibs
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libjnidispatch.so. Run with --info option to learn more.
+
+> Task :app:compileDebugKotlin
+> Task :app:processDebugJavaRes
+> Task :app:mergeDebugJavaResource
+> Task :app:compileDebugJavaWithJavac
+> Task :app:dexBuilderDebug
+> Task :app:mergeProjectDexDebug
+> Task :app:packageDebug
+> Task :app:assembleDebug
+> Task :app:createDebugApkListingFileRedirect
+Kotlin build report is written to file:///home/runner/work/MAA-Meow/MAA-Meow/build/reports/kotlin-build/MaaMeow-build-2026-10-31-11-59-07-0.txt
+
+[Incubating] Problems report is available at: file:///home/runner/work/MAA-Meow/MAA-Meow/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 4m 20s
+83 actionable tasks: 79 executed, 4 up-to-date
+Configuration cache entry stored.
+
+================ Chaquopy wheel probe ================
+=== onnxruntime (Android wheels on chaquo.com) ===
+
+=== opencv-python-headless (Android wheels) ===
+opencv_python_headless-4.1.2.30-1-cp38-cp38-android_21_arm64_v8a.whl
+opencv_python_headless-4.1.2.30-1-cp38-cp38-android_21_x86_64.whl
+opencv_python_headless-4.5.1.48-2-cp310-cp310-android_24_arm64_v8a.whl
+opencv_python_headless-4.5.1.48-2-cp310-cp310-android_24_armeabi_v7a.whl
+opencv_python_headless-4.5.1.48-2-cp310-cp310-android_24_x86.whl
+opencv_python_headless-4.5.1.48-2-cp310-cp310-android_24_x86_64.whl
+opencv_python_headless-4.5.1.48-2-cp38-cp38-android_16_armeabi_v7a.whl
+opencv_python_headless-4.5.1.48-2-cp38-cp38-android_16_x86.whl
+opencv_python_headless-4.5.1.48-2-cp38-cp38-android_21_arm64_v8a.whl
+opencv_python_headless-4.5.1.48-2-cp38-cp38-android_21_x86_64.whl

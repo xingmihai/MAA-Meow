@@ -1,0 +1,13 @@
+=== onnxruntime (Android wheels on chaquo.com) ===
+
+=== opencv-python-headless (Android wheels) ===
+opencv_python_headless-4.1.2.30-1-cp38-cp38-android_21_arm64_v8a.whl
+opencv_python_headless-4.1.2.30-1-cp38-cp38-android_21_x86_64.whl
+opencv_python_headless-4.5.1.48-2-cp310-cp310-android_24_arm64_v8a.whl
+opencv_python_headless-4.5.1.48-2-cp310-cp310-android_24_armeabi_v7a.whl
+opencv_python_headless-4.5.1.48-2-cp310-cp310-android_24_x86.whl
+opencv_python_headless-4.5.1.48-2-cp310-cp310-android_24_x86_64.whl
+opencv_python_headless-4.5.1.48-2-cp38-cp38-android_16_armeabi_v7a.whl
+opencv_python_headless-4.5.1.48-2-cp38-cp38-android_16_x86.whl
+opencv_python_headless-4.5.1.48-2-cp38-cp38-android_21_arm64_v8a.whl
+opencv_python_headless-4.5.1.48-2-cp38-cp38-android_21_x86_64.whl
