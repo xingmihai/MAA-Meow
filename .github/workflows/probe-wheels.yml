@@ -1,0 +1,68 @@
+name: Probe Chaquopy wheels
+
+# 轻量探测：列出 Chaquopy Android wheel 仓库上各依赖包的可用版本与 ABI。
+# 用于决定 Python 版本与依赖可行性，不涉及 Android 构建，约 1 分钟跑完。
+# 结果写到 ci-logs 分支的 wheels-probe.txt。
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - name: Probe wheel index
+        run: |
+          mkdir -p /tmp/diag
+          IDX="https://chaquo.com/pypi-13.1"
+          PKGS="numpy opencv-python-headless opencv-python pillow pyyaml shapely onnxruntime scipy"
+          OUT=/tmp/diag/wheels-probe.txt
+          : > "$OUT"
+
+          echo "index: $IDX" >> "$OUT"
+          echo "date: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$OUT"
+          echo >> "$OUT"
+
+          for p in $PKGS; do
+            {
+              echo "================ $p ================"
+              body=$(curl -sL "$IDX/$p/" || true)
+              if [ -z "$body" ]; then
+                echo "  (unreachable)"
+              else
+                echo "$body" \
+                  | grep -oE "${p//-/_}-[0-9][0-9a-z.]*(-[0-9]+)?-cp[0-9]+-[^>]*android[^>]*\.whl" \
+                  | sort -u | tail -25
+                echo "  ---- python tags present ----"
+                echo "$body" | grep -oE 'cp[0-9]+' | sort | uniq -c
+              fi
+              echo
+            } >> "$OUT"
+          done
+
+          cat "$OUT"
+
+      - name: Push probe result to ci-logs branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git fetch origin ci-logs --depth=1 2>/dev/null; then
+            git checkout ci-logs
+          else
+            git checkout --orphan ci-logs
+            git rm -rf . --quiet 2>/dev/null || true
+          fi
+          cp /tmp/diag/wheels-probe.txt wheels-probe.txt
+          git add wheels-probe.txt
+          git commit -m "probe: Chaquopy wheel index snapshot (run ${{ github.run_id }})" --quiet
+          git push origin ci-logs
+          echo "pushed to ci-logs"
