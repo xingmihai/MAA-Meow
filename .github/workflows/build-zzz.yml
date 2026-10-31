@@ -1,0 +1,146 @@
+name: Build ZZZ APK (Chaquopy 验证)
+
+# 目标：验证 Chaquopy 能编进 MAA-Meow 并产出 APK（M0 步骤 1+2）。
+# 独立于 build-dev.yml，不破坏原有明日方舟构建链路。
+# 产出物同时回答「onnxruntime 在 Chaquopy 上有没有可用 wheel」。
+
+on:
+  workflow_dispatch:
+    inputs:
+      abi:
+        description: 'ABI to build (arm64-v8a recommended)'
+        required: false
+        default: 'arm64-v8a'
+      probe_onnxruntime:
+        description: 'Also probe onnxruntime wheel availability'
+        required: false
+        type: boolean
+        default: true
+  push:
+    paths:
+      - '.github/workflows/build-zzz.yml'
+      - 'app/src/main/python/**'
+      - 'app/src/main/java/com/aliothmoon/maameow/zzz/**'
+      - 'app/build.gradle.kts'
+      - 'settings.gradle.kts'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
+
+      - name: Install NDK and CMake
+        run: |
+          sdkmanager --install "ndk;29.0.14206865" "cmake;3.22.1"
+
+      # ---------- 阶段一：MAA 资源准备（沿用原有脚本，用 3.12 跑） ----------
+      # 现阶段一条龙业务代码还没接入，APK 仍需 MaaCore/资源才能编过。
+      - name: Set up Python 3.12 (for MAA scripts)
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Install OCR conversion deps
+        run: python -m pip install -r scripts/requirements.txt
+
+      - name: Download and deploy MAA Core
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/setup_maa_core.py --clean
+
+      # ---------- 阶段二：探测 Chaquopy wheel 可用性 ----------
+      # 这一步直接回答「onnxruntime 有没有 Android wheel」，
+      # 决定 M2 之后要不要走 NDK 自编 / AAR / 换引擎的退路。
+      - name: Probe Chaquopy wheel index
+        continue-on-error: true
+        run: |
+          echo "=== onnxruntime (Android wheels on chaquo.com) ==="
+          curl -sL "https://chaquo.com/pypi-13.1/onnxruntime/" \
+            | grep -oE 'onnxruntime-[0-9][0-9.]*-cp[0-9]+-[^"]*android[^"]*\.whl' \
+            | sort -u | tail -20 || echo "(index unreachable)"
+          echo
+          echo "=== opencv-python-headless (Android wheels) ==="
+          curl -sL "https://chaquo.com/pypi-13.1/opencv-python-headless/" \
+            | grep -oE 'opencv_python_headless-[0-9][0-9.]*-[0-9]+-cp[0-9]+-[^"]*android[^"]*\.whl' \
+            | sort -u | tail -10 || echo "(index unreachable)"
+
+      # ---------- 阶段三：切到 3.11 供 Chaquopy 构建 ----------
+      # Chaquopy 要求 buildPython 与 app 的 Python major.minor 一致。
+      # 这里显式把路径传给 gradle，避免它在 PATH 上找错版本。
+      - name: Set up Python 3.11 (for Chaquopy buildPython)
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+
+      - name: Export buildPython path
+        run: |
+          PY311="$(which python3.11)"
+          echo "CHAQUOPY_BUILD_PYTHON=$PY311" >> "$GITHUB_ENV"
+          echo "buildPython -> $PY311"
+          "$PY311" --version
+
+      - name: Cache Gradle + Chaquopy
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.chaquopy
+          key: gradle-zzz-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', '**/gradle-wrapper.properties', '**/libs.versions.toml') }}
+          restore-keys: |
+            gradle-zzz-${{ runner.os }}-
+
+      # ---------- 阶段四：构建 ----------
+      - name: Build Debug APK
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          CHAQUOPY_BUILD_PYTHON: ${{ env.CHAQUOPY_BUILD_PYTHON }}
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean assembleDebug -Pmaa.abi=${{ github.event.inputs.abi || 'arm64-v8a' }}
+
+      # ---------- 阶段五：验证 Python 层确实打进了 APK ----------
+      - name: Verify Python layer inside APK
+        run: |
+          APK=$(ls app/build/outputs/apk/debug/*.apk | head -1)
+          echo "APK: $APK"
+          echo "--- size ---"
+          du -h "$APK"
+          echo "--- python native libs ---"
+          unzip -l "$APK" | grep -E 'lib/arm64-v8a/libpython|lib/x86_64/libpython' || echo "(no libpython found!)"
+          echo "--- python stdlib / site-packages assets ---"
+          unzip -l "$APK" | grep -cE 'assets/chaquopy/' || true
+          echo "--- our python modules ---"
+          unzip -l "$APK" | grep -E 'assets/chaquopy/.*(maa_bridge|android_controller|zzz_bootstrap)' || echo "(our modules not packaged!)"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: zzz-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: zzz-build-logs
+          path: |
+            app/build/reports/
+            .cxx/
