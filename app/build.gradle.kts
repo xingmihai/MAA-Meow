@@ -210,10 +210,11 @@ kotlin {
 // ---------------------------------------------------------------------------
 chaquopy {
     defaultConfig {
-        version = "3.11"
+        version = "3.10"
 
         // buildPython 必须与上面同 major.minor。
         // CI 由 CHAQUOPY_BUILD_PYTHON 显式指定；本地不设则让插件自己找。
+        // 必须是 3.10：Chaquo 索引上 opencv/shapely/scipy 只有 cp310 轮子。
         val buildPythonPath = System.getenv("CHAQUOPY_BUILD_PYTHON").orEmpty()
         if (buildPythonPath.isNotEmpty()) {
             buildPython(buildPythonPath)

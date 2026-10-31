@@ -1,6 +1,6 @@
 [versions]
 # Build Tools
-agp = "9.4.1"
+agp = "9.2.0"   # ZZZ 试验：Chaquopy 17.2 官方支持上界为 9.2
 bom = "0.23.6"
 kotlin = "2.4.21"
 ksp = "2.3.12"

@@ -90,17 +90,17 @@ jobs:
       # ---------- 阶段三：切到 3.11 供 Chaquopy 构建 ----------
       # Chaquopy 要求 buildPython 与 app 的 Python major.minor 一致。
       # 这里显式把路径传给 gradle，避免它在 PATH 上找错版本。
-      - name: Set up Python 3.11 (for Chaquopy buildPython)
+      - name: Set up Python 3.10 (for Chaquopy buildPython)
         uses: actions/setup-python@v7
         with:
-          python-version: '3.11'
+          python-version: '3.10'
 
       - name: Export buildPython path
         run: |
-          PY311="$(which python3.11)"
-          echo "CHAQUOPY_BUILD_PYTHON=$PY311" >> "$GITHUB_ENV"
-          echo "buildPython -> $PY311"
-          "$PY311" --version
+          PY310="$(which python3.10)"
+          echo "CHAQUOPY_BUILD_PYTHON=$PY310" >> "$GITHUB_ENV"
+          echo "buildPython -> $PY310"
+          "$PY310" --version
 
       - name: Cache Gradle + Chaquopy
         uses: actions/cache@v6
